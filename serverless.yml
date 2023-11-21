@@ -1,0 +1,31 @@
+service: serverless-app
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  stage: dev
+  region: process.env.REGION
+
+plugins:
+  - serverless-plugin-common-excludes
+  - serverless-plugin-include-dependencies
+
+package:
+  individually: true
+  excludeDevDependencies: false
+
+functions:
+  register:
+    handler: dist/functions/register.handler
+    events:
+      - http:
+          path: serverless-app/register
+          method: POST
+
+resources:
+  Resources:
+    SNSRegisterTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: Register Event Topic
+        TopicName: register-event

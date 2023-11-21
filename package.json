@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "Simple shortlinker express ts app",
   "main": "app.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node esbuild.config.js && npx serverless deploy -s dev"
   },
   "repository": {
     "type": "git",
@@ -15,7 +17,7 @@
     "serverless",
     "typescript",
     "express",
-    "dynamosql"
+    "dynamodb"
   ],
   "author": "BbIXOD",
   "license": "ISC",
@@ -24,10 +26,22 @@
   },
   "homepage": "https://github.com/BbIXOD/serverless-shortlinker-app#readme",
   "dependencies": {
+    "@types/aws-lambda": "^8.10.126",
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/serverless": "^3.12.18",
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1499.0",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.3.1",
     "esbuild": "^0.19.5",
     "esbuild-node-externals": "^1.9.0",
     "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "serverless": "^3.37.0",
+    "serverless-plugin-common-excludes": "^4.0.0",
+    "serverless-plugin-include-dependencies": "^5.1.0",
     "typescript": "^5.2.2"
   }
 }
