@@ -19,13 +19,47 @@ functions:
     handler: dist/functions/register.handler
     events:
       - http:
-          path: serverless-app/register
+          path: serverless-app/auth/register
           method: POST
 
-resources:
-  Resources:
-    SNSRegisterTopic:
-      Type: AWS::SNS::Topic
-      Properties:
-        DisplayName: Register Event Topic
-        TopicName: register-event
+  login:
+    handler: dist/functions/login.handler
+    events:
+      - http:
+          path: serverless-app/auth/login
+          method: POST
+  
+  verify:
+    handler: dist/functions/verify.handler
+    events:
+      - http:
+          path: serverless-app/auth/verify
+          method: POST
+  
+  createLink:
+    handler: dist/functions/link/createLink.handler
+    events:
+      - http:
+          path: serverless-app/link/createLink
+          method: POST
+  
+  deleteLink:
+    handler: dist/functions/link/deleteLink.handler
+    events:
+      - http:
+          path: serverless-app/link/deleteLink
+          method: POST
+
+  manageLinks:
+    handler: dist/functions/link/manageLinks.handler
+    events:
+      - http:
+          path: serverless-app/link/manageLinks
+          method: POST
+
+  useLink:
+    handler: dist/functions/link/useLink.handler
+    events:
+      - http:
+          path: serverless-app/link/useLink
+          method: POST

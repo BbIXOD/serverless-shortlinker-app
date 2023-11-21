@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt'
 import db from '../dbController.js'
 import * as validations from '../validations.js'
 import { SALT_ROUNDS, SERVICE_EMAIL } from '../globals.js'
+import { badRequest, internalError, success } from '../codes.js'
 
 const CODE_LENGTH = 4
 
@@ -17,12 +18,7 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
 
     if (!validations.validateEmail(body.email)
       || !validations.validatePassword(body.password)) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: 'Bad request',
-        })
-      }
+      return badRequest
     }
 
     const encryptedPassword = bcrypt.hashSync(body.password, Number(SALT_ROUNDS)) //TODO: maybe add separate error handler
@@ -63,20 +59,9 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
         console.log(err)
       })
     
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: 'User created',
-      })
-    }
+    return success //also we can use code 201
   }
   catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        message: 'Internal server error',
-        error: err.message
-      })
-    }
+    return internalError
   }
 }

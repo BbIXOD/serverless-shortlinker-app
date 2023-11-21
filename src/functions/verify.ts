@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import db from '../dbController.js'
+import { badRequest, internalError, notFound, success } from '../codes.js'
 
 export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
@@ -12,7 +13,8 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
       }
     }).promise()
 
-    if (!user || user.Item.verification_code !== body.verification_code) throw new Error()
+    if (!user) return notFound
+    if (user.Item.verification_code !== body.verification_code) return badRequest
 
     db.delete({
       TableName: 'pending_users',
@@ -29,13 +31,9 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
       }
     })
 
+    return success
   }
   catch (err) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        message: 'Bad request',
-      })
-    }
+    return internalError
   }
 }

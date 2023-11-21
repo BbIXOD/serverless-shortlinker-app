@@ -3,6 +3,7 @@ import * as bcrypt from 'bcrypt'
 import * as jwt from 'jsonwebtoken'
 import db from '../dbController.js'
 import * as globals from '../globals.js'
+import { badRequest, internalError, notFound } from '../codes.js'
 
 export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
@@ -15,14 +16,8 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
       }
     }).promise()
 
-    if (!user || !bcrypt.compareSync(body.password, user.Item.password)) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: 'Bad request',
-        })
-      }
-    }
+    if (!user) return notFound
+    if (!bcrypt.compareSync(body.password, user.Item.password)) return badRequest
 
     const token = jwt.sign({
       email: body.email,
@@ -39,12 +34,6 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
     }
   }
   catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        message: 'Internal server error',
-        error: err.message
-      })
-    }
+    return internalError
   }
 }
