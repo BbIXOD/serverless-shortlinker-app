@@ -4,11 +4,16 @@ provider:
   name: aws
   runtime: nodejs20.x
   stage: dev
-  region: process.env.REGION
+  region: eu-central-1
+  deploymentBucket:
+    name: sls-app-bucket
+  role: arn:aws:iam::019607412348:role/function-with-full-access
+
+configValidationMode: error
 
 plugins:
-  - serverless-plugin-common-excludes
   - serverless-plugin-include-dependencies
+  - serverless-plugin-common-excludes
 
 package:
   individually: true
@@ -19,47 +24,47 @@ functions:
     handler: dist/functions/register.handler
     events:
       - http:
-          path: serverless-app/auth/register
+          path: auth/register
           method: POST
 
   login:
     handler: dist/functions/login.handler
     events:
       - http:
-          path: serverless-app/auth/login
+          path: auth/login
           method: POST
   
   verify:
     handler: dist/functions/verify.handler
     events:
       - http:
-          path: serverless-app/auth/verify
+          path: auth/verify
           method: POST
   
   createLink:
     handler: dist/functions/link/createLink.handler
     events:
       - http:
-          path: serverless-app/link/createLink
+          path: link/createLink
           method: POST
   
-  deleteLink:
-    handler: dist/functions/link/deleteLink.handler
+  deactivateLink:
+    handler: dist/functions/link/deactivateLink.handler
     events:
       - http:
-          path: serverless-app/link/deleteLink
+          path: link/deactivateLink
           method: POST
 
   manageLinks:
     handler: dist/functions/link/manageLinks.handler
     events:
       - http:
-          path: serverless-app/link/manageLinks
+          path: link/manageLinks
           method: POST
 
   useLink:
     handler: dist/functions/link/useLink.handler
     events:
       - http:
-          path: serverless-app/link/useLink
+          path: link/useLink/{alias}
           method: POST

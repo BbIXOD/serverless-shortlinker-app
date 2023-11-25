@@ -32,3 +32,10 @@ export const internalError = {
     message: 'Internal server error',
   })
 }
+
+export const makeError = (message: string) => ({
+  statusCode: 500,
+  body: JSON.stringify({
+    message,
+  })
+})

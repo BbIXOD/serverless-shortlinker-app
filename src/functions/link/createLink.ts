@@ -20,6 +20,8 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
         link: body.link,
         alias: body.alias,
         creator: email,
+        uses: 0,
+        active : true,
       }
     }).promise()
 

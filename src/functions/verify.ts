@@ -4,6 +4,7 @@ import { badRequest, internalError, notFound, success } from '../codes.js'
 
 export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
+    console.log('Start verify handler')
     const body = JSON.parse(_event.body)
 
     const user = await db.get({
@@ -16,24 +17,31 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
     if (!user) return notFound
     if (user.Item.verification_code !== body.verification_code) return badRequest
 
-    db.delete({
+    console.log('User found, continue verification')
+
+    await db.delete({
       TableName: 'pending_users',
       Key: {
         email: body.email
       }
-    })
+    }).promise()
 
-    db.put({
+    console.log('User verified, continue registration')
+
+    await db.put({
       TableName: 'users',
       Item: {
         email: body.email,
         password: user.Item.password
       }
-    })
+    }).promise()
+
+    console.log('User registered')
 
     return success
   }
   catch (err) {
+    console.log(err.message)
     return internalError
   }
 }

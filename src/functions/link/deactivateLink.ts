@@ -5,9 +5,13 @@ import { getMailFromToken } from '../../tokenVerifier.js'
 
 export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
+    console.log('Start deactivate link handler')
+
     const email = getMailFromToken(_event.headers.Authorization)
 
     if (!email) return badRequest
+
+    console.log('User authorized, continue')
 
     const body = JSON.parse(_event.body)
 
@@ -20,6 +24,8 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
 
     if (!link) return badRequest
 
+    console.log('Got link')
+
     link.Item.active = false
 
     await db.put({
@@ -27,9 +33,12 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
       Item: link.Item
     }).promise()
 
+    console.log('Deactivated link')
+
     return success
   }
   catch (err) {
+    console.log(err.message)
     return internalError
   }
 }

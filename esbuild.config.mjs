@@ -1,9 +1,13 @@
 import { nodeExternalsPlugin } from "esbuild-node-externals";
 import { build } from "esbuild";
-import fs from "fs/promises"
+import fs from "fs"
 
 try {
-  const files = await fs.readdir("./src", { recursive: true, encoding: "utf-8" })
+  const files = fs.readdirSync("./src", { recursive: true, encoding: "utf-8",  })
+  .map(file => {
+    return './src/' + file.replace(/\\/g, '/')
+  })
+  .filter(file => fs.statSync(file).isFile())
 
 
   build({

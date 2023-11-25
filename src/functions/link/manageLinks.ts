@@ -5,17 +5,23 @@ import { getMailFromToken } from "../../tokenVerifier.js";
 
 export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
+    console.log('Start get links handler')
+
     const email = getMailFromToken(_event.headers.Authorization)
 
     if (!email) return badRequest
 
-    const links = await db.query({
+    console.log('User authorized, continue')
+
+    const links = await db.scan({
       TableName: "links",
-      KeyConditionExpression: "creator = :email",
+      FilterExpression: "creator = :email",
       ExpressionAttributeValues: {
-        ":creator": email
+        ":email": email
       }
     }).promise()
+
+    console.log('Get items')
 
     return {
       statusCode: 200,
@@ -25,6 +31,7 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
     }
   }
   catch (err) {
+    console.log(err.message)
     return internalError
   }
 }
