@@ -6,13 +6,17 @@ import { badRequest, internalError, success } from '../../codes.js'
 
 export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
+    console.log('Start create link handler')
+
     const body = JSON.parse(_event.body)
 
     const email = getMailFromToken(_event.headers.Authorization)
     
 
-    if (!email ||!validations.validateLink(body.link)
+    if (!email ||!validations.validateLink(body.link) //separate email validation
      || !validations.validateAlias(body.alias)) return badRequest
+
+    console.log('User registered && Validations passed')
 
     await db.put({
       TableName: 'links',
@@ -25,9 +29,12 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
       }
     }).promise()
 
+    console.log('Link created')
+
     return success
   }
   catch (err) {
+    console.error(err.message)
     return internalError
   }
 }
