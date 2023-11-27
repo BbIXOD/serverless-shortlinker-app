@@ -15,6 +15,7 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
 
     const links = await db.scan({
       TableName: "links",
+      IndexName: "CreatorIndex",
       FilterExpression: "creator = :email",
       ExpressionAttributeValues: {
         ":email": email

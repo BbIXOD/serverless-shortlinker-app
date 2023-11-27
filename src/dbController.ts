@@ -1,12 +1,6 @@
 import * as aws from 'aws-sdk'
-import * as globals from './globals.js'
+//made this module while tables were in cloud so i needed to pass credentials. posible moving this to each file.
 
-const credentials = ({
-  accessKeyId: globals.ACCESS_KEY_ID,
-  secretAccessKey: globals.SECRET_ACCES_KEY,
-  region: globals.REGION,
-})
-
-const db = new aws.DynamoDB.DocumentClient(credentials);
+const db = new aws.DynamoDB.DocumentClient();
 
 export default db

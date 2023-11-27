@@ -1,7 +1,6 @@
 import { SQSEvent, SQSHandler } from 'aws-lambda'
-import { SES } from 'aws-sdk'
-import { SERVICE_EMAIL } from '../../globals.js'
 import db from '../../dbController.js'
+import { sendDeactivationMessage } from '../../mailController.js'
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
   try {
@@ -19,34 +18,15 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
 
       link.Item.active = false
 
-      db.put({
+      await db.put({
         TableName: 'links',
         Item: link.Item
       }).promise()
 
-      const ses = new SES()
-
-      const emailParams = {
-        Destination: {
-          ToAddresses: [link.Item.creator]
-        },
-        Message: {
-          Body: {
-            Text: {
-              Data: `Your link ${link.Item.alias} has been deactivated.`
-            }
-          },
-          Subject: {
-            Data: 'Link deactivated'
-          }
-        },
-        Source: SERVICE_EMAIL
-      }
-
-      ses.sendEmail(emailParams)
+      await sendDeactivationMessage(link.Item.creator, link.Item.link)
     }
   }
   catch (err) {
-    console.log(err)
+    console.error(err)
   }
 }

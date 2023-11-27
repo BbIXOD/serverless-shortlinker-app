@@ -40,8 +40,12 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "serverless": "^3.37.0",
+    "serverless-create-global-dynamodb-table": "^3.1.1",
     "serverless-plugin-common-excludes": "^4.0.0",
     "serverless-plugin-include-dependencies": "^5.1.0",
     "typescript": "^5.2.2"
+  },
+  "devDependencies": {
+    "serverless-lift": "^1.28.1"
   }
 }

@@ -1,10 +1,10 @@
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
-import { SES } from 'aws-sdk'
 import * as bcrypt from 'bcryptjs'
 import db from '../dbController.js'
 import * as validations from '../validations.js'
-import { SALT_ROUNDS, SERVICE_EMAIL } from '../globals.js'
+import { SALT_ROUNDS } from '../globals.js'
 import { badRequest, internalError, makeError, success } from '../codes.js'
+import { sendCode } from '../mailController.js'
 
 const CODE_LENGTH = 4
 
@@ -26,7 +26,7 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
     console.log('Validations passed')
 
     const pendingUser = await db.get({
-      TableName: 'pending_users',
+      TableName: 'pendingUsers',
       Key: {
         email: body.email
       }
@@ -50,7 +50,7 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
     const verificationCode = generateVerificationCode()
 
     await db.put({
-      TableName: 'pending_users',
+      TableName: 'pendingUsers',
       Item: {
         email: body.email,
         password: encryptedPassword,
@@ -60,28 +60,9 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
 
     console.log('Created verification code, sending email')
 
-    const ses = new SES()
+    sendCode(body.email, verificationCode)
 
-    const emailParams = {
-      Destination: {
-        ToAddresses: [body.email],
-      },
-      Message: {
-        Body: {
-          Text: {  //TODO: add html version
-            Data: 'Your verification code is: ' + verificationCode
-          },
-        },
-        Subject: {
-            Data: 'Verify your account'
-        }, 
-      },
-      Source: SERVICE_EMAIL,
-    }
-
-    await ses.sendEmail(emailParams).promise()
-
-    console.log('Email sent')
+    console.log('Email sent, code is ', verificationCode)
     
     return success //also we can use code 201
   }

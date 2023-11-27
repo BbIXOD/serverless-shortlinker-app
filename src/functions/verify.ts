@@ -8,19 +8,19 @@ export const handler: APIGatewayProxyHandler = async (_event: APIGatewayProxyEve
     const body = JSON.parse(_event.body)
 
     const user = await db.get({
-      TableName: 'pending_users',
+      TableName: 'pendingUsers',
       Key: {
         email: body.email
       }
     }).promise()
 
-    if (!user) return notFound
+    if (!user.Item) return notFound
     if (user.Item.verification_code !== body.verification_code) return badRequest
 
     console.log('User found, continue verification')
 
     await db.delete({
-      TableName: 'pending_users',
+      TableName: 'pendingUsers',
       Key: {
         email: body.email
       }

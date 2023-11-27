@@ -1,5 +1,6 @@
 service: serverless-app
 
+
 provider:
   name: aws
   runtime: nodejs20.x
@@ -9,17 +10,96 @@ provider:
     name: sls-app-bucket
   role: arn:aws:iam::019607412348:role/function-with-full-access
 
+
 configValidationMode: error
 
+
 plugins:
+  - serverless-lift
+  - serverless-create-global-dynamodb-table
   - serverless-plugin-include-dependencies
   - serverless-plugin-common-excludes
-
 package:
   individually: true
   excludeDevDependencies: false
 
+custom:
+  globalTables:
+    version: v2
+    regions:
+      - eu-east-1
+    createStack: false
+
+constructs:
+  deactivated-links-queue:
+    type: queue
+    worker:
+      handler: dist/src/functions/deactivateLinkWithSQS.handler
+    batchSize: 10
+
+
+resources:
+  Resources:
+    PendingUserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: pendingUsers
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: users
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    
+    LinkTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: links
+        AttributeDefinitions:
+          - AttributeName: alias
+            AttributeType: S
+        KeySchema:
+          - AttributeName: alias
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        
+    LetterQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: letterQueue
+        MaximumMessageSize: 2048
+        ReceiveMessageWaitTimeSeconds: 20
+        VisibilityTimeout: 30
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt:
+              - DeadLetterQueue
+              - Arn
+          maxReceiveCount: 5
+
+
+
 functions:
+
   register:
     handler: dist/functions/register.handler
     events:
@@ -47,6 +127,8 @@ functions:
       - http:
           path: link/createLink
           method: POST
+    environment:
+      QUEUE_URL: {$construct: letterQueue.queueUrl}
   
   deactivateLink:
     handler: dist/functions/link/deactivateLink.handler
