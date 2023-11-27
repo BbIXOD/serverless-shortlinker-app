@@ -8,7 +8,8 @@ provider:
   region: eu-central-1
   deploymentBucket:
     name: sls-app-bucket
-  role: arn:aws:iam::019607412348:role/function-with-full-access
+  iam:
+    role: arn:aws:iam::019607412348:role/function-with-full-access
 
 
 configValidationMode: error
@@ -34,7 +35,7 @@ constructs:
   deactivated-links-queue:
     type: queue
     worker:
-      handler: dist/src/functions/deactivateLinkWithSQS.handler
+      handler: dist/functions/link/deactivateWithSQS.handler
     batchSize: 10
 
 
@@ -81,20 +82,6 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
-        
-    LetterQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: letterQueue
-        MaximumMessageSize: 2048
-        ReceiveMessageWaitTimeSeconds: 20
-        VisibilityTimeout: 30
-        RedrivePolicy:
-          deadLetterTargetArn:
-            Fn::GetAtt:
-              - DeadLetterQueue
-              - Arn
-          maxReceiveCount: 5
 
 
 
@@ -128,7 +115,7 @@ functions:
           path: link/createLink
           method: POST
     environment:
-      QUEUE_URL: {$construct: letterQueue.queueUrl}
+      QUEUE_URL: ${construct:deactivated-links-queue.queueUrl}
   
   deactivateLink:
     handler: dist/functions/link/deactivateLink.handler
