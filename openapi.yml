@@ -96,7 +96,7 @@ components:
             email:
               type: string
               format: email
-            code:
+            verification_code:
               type: integer
           required:
             - email
