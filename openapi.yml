@@ -1,0 +1,319 @@
+openapi: 3.0.0
+components:
+  schemas:
+    MessageResponce:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        body:
+          type: string
+      required:
+        - statusCode
+        - body
+      additionalProperties: false
+    LinksResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        body:
+          type: object
+          properties:
+            links:
+              type: array
+              items:
+                type: object
+                properties:
+                  link:
+                    type: string
+                  alias:
+                    type: string
+                  creator:
+                    type: string
+                  uses:
+                    type: integer
+                  active:
+                    type: boolean
+                  one_time:
+                    type: boolean
+                required:
+                  - link
+                  - alias
+                  - creator
+                  - uses
+                  - active
+                  - one_time
+                additionalProperties: false
+          required:
+            - links
+          additionalProperties: false
+      required:
+        - statusCode
+        - body
+      additionalProperties: false
+    TokenResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        body:
+          type: object
+          properties:
+            token:
+              type: string
+          required:
+            - token
+          additionalProperties: false
+      required:
+        - statusCode
+        - body
+      additionalProperties: false
+    LoginDataRequest:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+            password:
+              type: string
+          required:
+            - email
+            - password
+          additionalProperties: false
+      required:
+        - body
+      additionalProperties: false
+    VerifyRequest:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+            code:
+              type: integer
+          required:
+            - email
+            - code
+          additionalProperties: false
+      required:
+        - body
+      additionalProperties: false
+    LinkCreationRequest:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            alias:
+              type: string
+            link:
+              type: string
+              format: url
+          required:
+            - alias
+            - link
+          additionalProperties: false
+      required:
+        - body
+      additionalProperties: false
+    WithAliasRequest:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            alias:
+              type: string
+          required:
+            - alias
+          additionalProperties: false
+      required:
+        - body
+      additionalProperties: false
+  securitySchemes: {}
+info:
+  title: Shortlinker API
+  description: Simple link shortener
+  version: '2'
+paths:
+  /auth/register:
+    post:
+      operationId: register
+      summary: Register new user
+      description: Registers new user by email and password; then sends verification email
+      responses:
+        '200':
+          description: Status 200 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '400':
+          description: Status 400 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '500':
+          description: Status 500 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+  /auth/login:
+    post:
+      operationId: login
+      summary: Login
+      description: Logs in user by email and password. returns JWT token.
+      responses:
+        '200':
+          description: Status 200 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: Status 400 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '404':
+          description: Status 404 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '500':
+          description: Status 500 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+  /auth/verify:
+    post:
+      operationId: verify
+      summary: Verify email
+      description: Verifies user's email by confirmation code
+      responses:
+        '200':
+          description: Status 200 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '400':
+          description: Status 400 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '500':
+          description: Status 500 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+  /link/createLink:
+    post:
+      operationId: createLink
+      summary: Creates link
+      description: Creates new pseudonim for link
+      responses:
+        '200':
+          description: Status 200 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '400':
+          description: Status 400 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '500':
+          description: Status 500 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+  /link/deactivateLink:
+    post:
+      operationId: deactivateLink
+      summary: deactivates link
+      description: 'deactivates link, quite simple'
+      responses:
+        '200':
+          description: Status 200 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '400':
+          description: Status 400 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '500':
+          description: Status 500 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+  /link/manageLinks:
+    post:
+      operationId: manageLinks
+      summary: get uer links
+      description: returns information about user links
+      responses:
+        '200':
+          description: Status 200 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinksResponse'
+        '400':
+          description: Status 400 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '500':
+          description: Status 500 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+  '/link/useLink/{alias}':
+    post:
+      operationId: useLink
+      summary: get link
+      description: 'get links by alias, increment counter, deactivate one-time link'
+      responses:
+        '200':
+          description: Status 200 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '400':
+          description: Status 400 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'
+        '500':
+          description: Status 500 Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponce'

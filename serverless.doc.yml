@@ -1,0 +1,190 @@
+documentation:
+  version: '2'
+  title: 'Shortlinker API'
+  description: 'Simple link shortener'
+  models: 
+    - name: MessageResponce
+      description: Occures on failure and on success (if no additional data)
+      contentType: application/json
+      schema: ${file(models/response/MessageResponse.json)}
+    - name: LinksResponse
+      description: List of links basically
+      contentType: application/json
+      schema: ${file(models/response/LinksResponse.json)}
+    - name: TokenResponse
+      description: JWT token
+      contentType: application/json
+      schema: ${file(models/response/TokenResponse.json)}
+    - name: LoginDataRequest
+      description: Login data (email and password)
+      contentType: application/json
+      schema: ${file(models/request/LoginDataRequest.json)}
+    - name: VerifyRequest
+      description: Verify data (email and code)
+      contentType: application/json
+      schema: ${file(models/request/VerifyRequest.json)}
+    - name: LinkCreationRequest
+      description: Make Alias for link
+      contentType: application/json
+      schema: ${file(models/request/LinkCreationRequest.json)}
+    - name: WithAliasRequest
+      description: Alias only
+      contentType: application/json
+      schema: ${file(models/request/WithAliasRequest.json)}
+
+
+
+endpoints:
+  register:
+    summary: Register new user
+    description: Registers new user by email and password; then sends verification email
+    requestBody: 
+      description: User email and password
+    requestModels:
+      application/json: LoginDataRequest
+    methodResponses:
+      - statusCode: 200
+        description: Successful registration
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 400
+        description: Bad request possible validation failure or email already in use
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 500
+        description: Internal server error
+        responseModels:
+          application/json: MessageResponce
+
+  login:
+    summary: Login
+    description: Logs in user by email and password. returns JWT token.
+    requestBody: 
+      description: User email and password
+    requestModels:
+      application/json: LoginDataRequest
+    methodResponses:
+      - statusCode: 200
+        description: Successful login
+        responseModels:
+          application/json: TokenResponse
+      - statusCode: 400
+        description: Bad request. Invalid email or password
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 404
+        description: User not found
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 500
+        description: Internal server error
+        responseModels:
+          application/json: MessageResponce
+        
+  
+  verify:
+    summary: Verify email
+    description: Verifies user's email by confirmation code
+    requestBody: 
+      description: User email and code
+    requestModels:
+      application/json: VerifyRequest
+    methodResponses:
+      - statusCode: 200
+        description: Successful verification
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 400
+        description: Bad request. Invalid email or code
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 500
+        description: Internal server error
+        responseModels:
+          application/json: MessageResponce
+          
+  
+  createLink:
+    summary: Creates link
+    description: Creates new pseudonim for link
+    requestBody: 
+      description: Real link, alias, ttl for link (ONE_TIME, ONE_DAY, THREE_DAYS, ONE_WEEK, NEVER)
+    requestModels:
+      application/json: LinkCreationRequest
+    methodResponses:
+      - statusCode: 200
+        description: Successful creation
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 400
+        description: Bad request. Might be validation failure
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 500
+        description: Internal server error
+        responseModels:
+          application/json: MessageResponce
+  
+  deactivateLink:
+    summary: deactivates link
+    description: deactivates link, quite simple
+    requestModels:
+      application/json: WithAliasRequest
+    requestBody: 
+      description: link alias
+    methodResponses:
+      - statusCode: 200
+        description: Successful registration
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 400
+        description: Bad request. User has not this link
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 500
+        description: Internal server error
+        responseModels:
+          application/json: MessageResponce
+
+  manageLinks:
+    summary: get uer links
+    description: returns information about user links
+    methodResponses:
+      - statusCode: 200
+        description: Successful registration
+        responseModels:
+          application/json: LinksResponse
+      - statusCode: 400
+        description: Bad request. Problems with token
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 500
+        description: Internal server error
+        responseModels:
+          application/json: MessageResponce
+
+  useLink:
+    summary: get link
+    description: get links by alias, increment counter, deactivate one-time link
+    requestModels:
+      application/json: WithAliasRequest
+    requestBody: 
+      description: alias
+    pathParams:
+      - name: alias
+        description: link alias
+        schema: 
+          type: string
+    methodResponses:
+      - statusCode: 200
+        description: Successful link retrieval.
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 400
+        description: Bad request. Problems with token
+        responseModels:
+          application/json: MessageResponce
+      - statusCode: 500
+        description: Internal server error
+        responseModels:
+          application/json: MessageResponce

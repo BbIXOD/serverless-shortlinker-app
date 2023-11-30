@@ -46,6 +46,7 @@
     "typescript": "^5.2.2"
   },
   "devDependencies": {
-    "serverless-lift": "^1.28.1"
+    "serverless-lift": "^1.28.1",
+    "serverless-openapi-documentation": "^0.4.0"
   }
 }

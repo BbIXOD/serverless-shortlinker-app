@@ -12,14 +12,16 @@ provider:
     role: arn:aws:iam::019607412348:role/function-with-full-access
 
 
-configValidationMode: error
+configValidationMode: off
 
 
 plugins:
   - serverless-lift
+  - serverless-openapi-documentation #dev only TODO: remove
   - serverless-create-global-dynamodb-table
   - serverless-plugin-include-dependencies
   - serverless-plugin-common-excludes
+
 package:
   individually: true
   excludeDevDependencies: false
@@ -30,6 +32,7 @@ custom:
     regions:
       - eu-east-1
     createStack: false
+  documentation: ${file(serverless.doc.yml):documentation}
 
 constructs:
   deactivated-links-queue:
@@ -93,6 +96,7 @@ functions:
       - http:
           path: auth/register
           method: POST
+          documentation: ${file(serverless.doc.yml):endpoints.register}
 
   login:
     handler: dist/functions/login.handler
@@ -100,6 +104,8 @@ functions:
       - http:
           path: auth/login
           method: POST
+          documentation: ${file(serverless.doc.yml):endpoints.login}
+        
   
   verify:
     handler: dist/functions/verify.handler
@@ -107,6 +113,8 @@ functions:
       - http:
           path: auth/verify
           method: POST
+          documentation: ${file(serverless.doc.yml):endpoints.verify}
+          
   
   createLink:
     handler: dist/functions/link/createLink.handler
@@ -114,6 +122,7 @@ functions:
       - http:
           path: link/createLink
           method: POST
+          documentation: ${file(serverless.doc.yml):endpoints.createLink}
     environment:
       QUEUE_URL: ${construct:deactivated-links-queue.queueUrl}
   
@@ -123,6 +132,7 @@ functions:
       - http:
           path: link/deactivateLink
           method: POST
+          documentation: ${file(serverless.doc.yml):endpoints.deactivateLink}
 
   manageLinks:
     handler: dist/functions/link/manageLinks.handler
@@ -130,6 +140,7 @@ functions:
       - http:
           path: link/manageLinks
           method: POST
+          documentation: ${file(serverless.doc.yml):endpoints.manageLinks}
 
   useLink:
     handler: dist/functions/link/useLink.handler
@@ -137,3 +148,4 @@ functions:
       - http:
           path: link/useLink/{alias}
           method: POST
+          documentation: ${file(serverless.doc.yml):endpoints.useLink}
